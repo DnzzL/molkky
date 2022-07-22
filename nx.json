@@ -1,8 +1,10 @@
 {
-  "$schema": "./node_modules/nx/schemas/nx-schema.json",
-  "npmScope": "temp-workspace",
+  "npmScope": "legrand.sh",
   "affected": {
     "defaultBase": "main"
+  },
+  "cli": {
+    "defaultCollection": "@nrwl/react"
   },
   "implicitDependencies": {
     "package.json": {
@@ -19,10 +21,13 @@
       }
     }
   },
-  "targetDefaults": {
-    "build": {
-      "dependsOn": ["^build"]
-    }
+  "targetDependencies": {
+    "build": [
+      {
+        "target": "build",
+        "projects": "dependencies"
+      }
+    ]
   },
   "generators": {
     "@nrwl/react": {

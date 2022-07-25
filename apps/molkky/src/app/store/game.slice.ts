@@ -34,6 +34,7 @@ export interface GameState extends EntityState<GameEntity> {
   throws: Throw[];
   order: string[];
   turn: number;
+  winner: string;
 }
 
 export const gameAdapter = createEntityAdapter<GameEntity>();
@@ -43,6 +44,7 @@ export const initialGameState: GameState = gameAdapter.getInitialState({
   throws: [],
   order: [],
   turn: 0,
+  winner: '',
 });
 
 export const gameSlice = createSlice({
@@ -139,12 +141,12 @@ export const gameSlice = createSlice({
           .map(({ playerId }: { playerId: string }) => playerId),
       };
     },
-    setAtRisk: (state: any, action: PayloadAction<{ id: string }>) => {
+    setAtRisk: (state: any, action: PayloadAction<{ playerId: string }>) => {
       const player = state.players.find(
-        (p: Player) => p.id === action.payload.id
+        (p: Player) => p.id === action.payload.playerId
       );
       const playerIdx = state.players.findIndex(
-        (p: Player) => p.id === action.payload.id
+        (p: Player) => p.id === action.payload.playerId
       );
       return {
         ...state,
@@ -155,12 +157,15 @@ export const gameSlice = createSlice({
         ],
       };
     },
-    eliminatePlayer: (state: any, action: PayloadAction<{ id: string }>) => {
+    eliminatePlayer: (
+      state: any,
+      action: PayloadAction<{ playerId: string }>
+    ) => {
       const player = state.players.find(
-        (p: Player) => p.id === action.payload.id
+        (p: Player) => p.id === action.payload.playerId
       );
       const playerIdx = state.players.findIndex(
-        (p: Player) => p.id === action.payload.id
+        (p: Player) => p.id === action.payload.playerId
       );
       return {
         ...state,
@@ -169,6 +174,12 @@ export const gameSlice = createSlice({
           { ...player, isEliminated: true },
           ...state.players.slice(playerIdx + 1),
         ],
+      };
+    },
+    setWinner: (state: any, action: PayloadAction<{ playerId: string }>) => {
+      return {
+        ...state,
+        winner: action.payload.playerId,
       };
     },
   },
@@ -220,4 +231,9 @@ export const selectCurrentPlayer = createSelector(getGameState, (state) =>
   state.players
     .filter((p: Player) => !p.isEliminated)
     .find((p: Player) => p.id === state.order[state.turn % state.order.length])
+);
+
+export const selectWinner = createSelector(
+  getGameState,
+  (state) => state.winner
 );

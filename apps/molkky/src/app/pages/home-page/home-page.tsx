@@ -36,7 +36,7 @@ export function HomePage(props: HomePageProps) {
 
       <input
         type="number"
-        defaultValue={0}
+        min="0"
         value={playerNumber}
         onChange={(e) => onPlayerNumberChange(e)}
       />

@@ -107,14 +107,23 @@ export const gameSlice = createSlice({
       const lastPlayer = state.players.find(
         (p: Player) => p.id === lastThrow.playerId
       );
+      const lastPlayerIdx = state.players.findIndex(
+        (p: Player) => p.id === lastThrow.playerId
+      );
       return {
         ...state,
         throws: state.throws.filter(
           (_: Throw, i: number) => i !== state.throws.length - 1
         ),
         players: [
-          ...state.players,
-          { ...lastPlayer, score: lastPlayer.score - lastThrow.points },
+          ...state.players.slice(0, lastPlayerIdx),
+          {
+            ...lastPlayer,
+            score: lastPlayer.score - lastThrow.points,
+            isAtRisk: false,
+            isEliminated: false,
+          },
+          ...state.players.slice(lastPlayerIdx + 1),
         ],
         turn: state.turn - 1,
       };
@@ -123,11 +132,6 @@ export const gameSlice = createSlice({
       return {
         ...state,
         throws: [],
-        // players: [
-        //   ...state.players.forEach((p: Player) => {
-        //     p.score = 0;
-        //   }),
-        // ],
         turn: 0,
         order: state.players
           .map((p: Player) => p.id)

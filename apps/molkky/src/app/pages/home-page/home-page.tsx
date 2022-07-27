@@ -1,34 +1,18 @@
 import styles from './home-page.module.css';
 import { useForm } from 'react-hook-form';
-import { ChangeEvent, useState } from 'react';
-import { useDispatch } from 'react-redux';
-import { gameActions } from '../../store/game.slice';
-import { useNavigate } from 'react-router-dom';
+import usePlayerForm from '../../hooks/use-player-form/use-player-form';
 
 /* eslint-disable-next-line */
 export interface HomePageProps {}
 
 export function HomePage(props: HomePageProps) {
-  const [playerNumber, setPlayerNumber] = useState(0);
+  const { playerNumber, onPlayerNumberChange, onFormSubmit } = usePlayerForm();
+  const { register, handleSubmit } = useForm();
+
   function range(length: number) {
     return Array.from({ length }, (_, i) => i);
   }
   const playerNumberRange = range(playerNumber);
-  const dispatch = useDispatch();
-  const navigate = useNavigate();
-
-  function onPlayerNumberChange(event: ChangeEvent<HTMLInputElement>) {
-    setPlayerNumber(+event.target.value);
-  }
-
-  const onSubmit = (names: any) => {
-    Object.values(names).forEach((name) => {
-      dispatch(gameActions.addPlayer({ name: '' + name }));
-    });
-    navigate('/game');
-  };
-
-  const { register, handleSubmit } = useForm();
 
   return (
     <div className={styles['container']}>
@@ -41,7 +25,7 @@ export function HomePage(props: HomePageProps) {
         onChange={(e) => onPlayerNumberChange(e)}
       />
 
-      <form onSubmit={handleSubmit(onSubmit)}>
+      <form onSubmit={handleSubmit(onFormSubmit)}>
         {playerNumberRange.map((i) => {
           return (
             <input

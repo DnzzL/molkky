@@ -129,10 +129,16 @@ export const gameSlice = createSlice({
       };
     },
     startGame: (state: any) => {
+      const startingPlayers = state.players.map((p: Player) => {
+        return { ...p, score: 0 };
+      });
+
       return {
         ...state,
         throws: [],
         turn: 0,
+        winner: '',
+        players: startingPlayers,
         order: state.players
           .map((p: Player) => p.id)
           .map((playerId: string) => ({ playerId, sort: Math.random() }))
@@ -176,6 +182,25 @@ export const gameSlice = createSlice({
         players: [
           ...state.players.slice(0, playerIdx),
           { ...player, isEliminated: true },
+          ...state.players.slice(playerIdx + 1),
+        ],
+      };
+    },
+    setPlayerScore: (
+      state: any,
+      action: PayloadAction<{ playerId: string; score: number }>
+    ) => {
+      const player = state.players.find(
+        (p: Player) => p.id === action.payload.playerId
+      );
+      const playerIdx = state.players.findIndex(
+        (p: Player) => p.id === action.payload.playerId
+      );
+      return {
+        ...state,
+        players: [
+          ...state.players.slice(0, playerIdx),
+          { ...player, score: action.payload.score },
           ...state.players.slice(playerIdx + 1),
         ],
       };

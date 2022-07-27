@@ -1,10 +1,11 @@
 import PinGroup from '../../components/pin-group/pin-group';
-import styles from './game.module.css';
 import useThrow from '../../hooks/use-throw/use-throw';
+import styles from './game.module.css';
 
 import { useDispatch, useSelector } from 'react-redux';
 
 import { useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import {
   gameActions,
   Player,
@@ -13,16 +14,13 @@ import {
   selectWinner,
   Throw,
 } from '../../store/game.slice';
+import useGameStart from '../../hooks/use-game-start/use-game-start';
 
 /* eslint-disable-next-line */
 export interface GameProps {}
 
 export function Game(props: GameProps) {
-  const dispatch = useDispatch();
-  useEffect(() => {
-    dispatch(gameActions.startGame());
-  }, [dispatch]);
-
+  const { onClickRestart, onClickReset } = useGameStart();
   const { currentPlayer, onPinClinkHandle, onUndoThrow } = useThrow();
   const winner = useSelector(selectWinner);
   const throws = useSelector(selectThrows);
@@ -34,15 +32,18 @@ export function Game(props: GameProps) {
         <div>
           <p>{currentPlayer?.name} is playing</p>
           <PinGroup onClickHandle={onPinClinkHandle} />
-          <button onClick={() => onUndoThrow()}>Undo</button>
+          <button onClick={onUndoThrow}>Undo</button>
         </div>
       ) : (
-        <p>{winner} has won!</p>
+        <>
+          <p>{winner} has won!</p>
+          <button onClick={onClickRestart}>Restart</button>
+          <button onClick={onClickReset}>Reset</button>
+        </>
       )}
       <div>
-        {throws.map((t: Throw, idx: number) => {
-          const player = players.find((p: Player) => p.id === t.playerId);
-          return <li key={idx}>{`${player?.name} last throw:${t.points}`}</li>;
+        {players.map((p: Player) => {
+          return <li key={p.id}>{`${p.name}: ${p.score}`}</li>;
         })}
       </div>
     </div>

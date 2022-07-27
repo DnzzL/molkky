@@ -9,32 +9,47 @@ const gameMiddleware: Middleware = (store) => {
 
       const throws = gameState.throws;
       const players = gameState.players;
+      const currentPlayerId = action.payload.playerId;
       const playerThrows = throws
-        .filter((t: Throw) => t.playerId === action.payload.playerId)
+        .filter((t: Throw) => t.playerId === currentPlayerId)
         .map((t: Throw) => t.points);
-      checkForAtRisk(playerThrows);
-      checkForElimination(players, playerThrows);
+      const playerTotal = playerThrows.reduce(
+        (acc: number, a: number) => acc + a,
+        0
+      );
+      checkForAtRisk(playerThrows, currentPlayerId);
+      checkForElimination(
+        players,
+        playerThrows,
+        currentPlayerId,
+        action.payload.points
+      );
+      checkForWinner(playerTotal, currentPlayerId);
+      checkForExceeding(playerTotal, currentPlayerId);
     } else {
       next(action);
     }
 
-    function checkForElimination(players: Player[], playerThrows: any) {
+    function checkForElimination(
+      players: Player[],
+      playerThrows: number[],
+      playerId: string,
+      scoredPoints: number
+    ) {
       const lastThreeThrowsTotal = playerThrows
         .slice(-3)
         .reduce((acc: number, a: number) => acc + a, 0);
       if (
         playerThrows.length > 2 &&
         lastThreeThrowsTotal === 0 &&
-        action.payload.points === 0
+        scoredPoints === 0
       ) {
-        store.dispatch(
-          gameActions.eliminatePlayer({ playerId: action.payload.playerId })
-        );
-        checkForWinner(players);
+        store.dispatch(gameActions.eliminatePlayer({ playerId }));
+        checkForEnoughPlayers(players, playerId);
       }
     }
 
-    function checkForAtRisk(playerThrows: any) {
+    function checkForAtRisk(playerThrows: number[], playerId: string) {
       const lastTwoThrowsTotal = playerThrows
         .slice(-2)
         .reduce((acc: number, a: number) => acc + a, 0);
@@ -43,15 +58,30 @@ const gameMiddleware: Middleware = (store) => {
         lastTwoThrowsTotal === 0 &&
         action.payload.points === 0
       ) {
+        store.dispatch(gameActions.setAtRisk({ playerId }));
+      }
+    }
+
+    function checkForExceeding(playerTotal: number, playerId: string) {
+      if (playerTotal > 50) {
         store.dispatch(
-          gameActions.setAtRisk({ playerId: action.payload.playerId })
+          gameActions.setPlayerScore({
+            playerId,
+            score: 25,
+          })
         );
       }
     }
 
-    function checkForWinner(players: Player[]) {
+    function checkForWinner(playerTotal: number, playerId: string) {
+      if (playerTotal === 50) {
+        store.dispatch(gameActions.setWinner({ playerId }));
+      }
+    }
+
+    function checkForEnoughPlayers(players: Player[], playerId: string) {
       const activePlayers = players.filter(
-        (p: Player) => !p.isEliminated && p.id !== action.payload.playerId
+        (p: Player) => !p.isEliminated && p.id !== playerId
       );
       if (activePlayers.length === 1) {
         store.dispatch(

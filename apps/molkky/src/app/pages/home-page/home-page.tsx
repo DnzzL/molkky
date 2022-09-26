@@ -1,6 +1,7 @@
 import styles from './home-page.module.css';
 import { useForm } from 'react-hook-form';
 import usePlayerForm from '../../hooks/use-player-form/use-player-form';
+import { range } from '../../functions/utils';
 
 /* eslint-disable-next-line */
 export interface HomePageProps {}
@@ -8,10 +9,6 @@ export interface HomePageProps {}
 export function HomePage(props: HomePageProps) {
   const { playerNumber, onPlayerNumberChange, onFormSubmit } = usePlayerForm();
   const { register, handleSubmit } = useForm();
-
-  function range(length: number) {
-    return Array.from({ length }, (_, i) => i);
-  }
   const playerNumberRange = range(playerNumber);
 
   return (

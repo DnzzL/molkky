@@ -25,16 +25,18 @@ export function Game(props: GameProps) {
           <button onClick={onUndoThrow}>Undo</button>
         </div>
       ) : (
-        <>
-          <p>{winner} has won!</p>
-          <button onClick={onClickRestart}>Restart</button>
-          <button onClick={onClickReset}>Reset</button>
-        </>
+        <p>{winner} has won!</p>
       )}
       <div>
-        {players.map((p: Player) => {
-          return <li key={p.id}>{`${p.name}: ${p.score}`}</li>;
-        })}
+        <ul>
+          {players.map((p: Player) => {
+            return <li key={p.id}>{`${p.name}: ${p.score}`}</li>;
+          })}
+        </ul>
+      </div>
+      <div>
+        <button onClick={onClickRestart}>Restart</button>
+        <button onClick={onClickReset}>Reset</button>
       </div>
     </div>
   );
